@@ -17,7 +17,7 @@ JSON Body:
     - shortUrl (string) (required)
     - longUrl (string) (required)
 ```
-<br>
+
 For editing a long URL
 ```
 Endpoint: http://localhost:8888/link/edit
@@ -25,7 +25,7 @@ JSON Body:
     - shortUrl (string) (required)
     - longUrl (string) (required)
 ```
-<br>
+
 For deleting a long URL
 ```
 Endpoint: http://localhost:8888/link/delete
