@@ -1,6 +1,7 @@
 package shortener
 
 import (
+	"fmt"
 	"testing"
 	"url-shortener/mock"
 	"url-shortener/models"
@@ -30,20 +31,36 @@ func TestServiceFindByShortLink(t *testing.T) {
 }
 
 func TestServiceCreateLink(t *testing.T) {
-	m := new(mock.MockShortenerRepo)
-	data := models.Link{
-		LongUrl:  "http://jmoiron.github.io/sqlx/",
-		ShortUrl: "sqlx",
+	testCase := []struct {
+		mockFindByShortLink *models.Link
+		shortUrl            string
+		longUrl             string
+		expected            interface{}
+	}{
+		{nil, "sqlx", "http://jmoiron.github.io/sqlx/", nil},
+		{&models.Link{}, "", "", fmt.Errorf("SHORT_URL_IS_TAKEN")},
 	}
 
-	m.On("CreateLink").Return(nil)
+	for _, data := range testCase {
+		m := new(mock.MockShortenerRepo)
+		link := models.Link{
+			LongUrl:  data.longUrl,
+			ShortUrl: data.shortUrl,
+		}
 
-	s := NewShortenerService(m)
-	err := s.CreateLink(data)
+		// var link *models.Link
 
-	m.AssertExpectations(t)
+		m.On("CreateLink").Return(nil)
+		m.On("FindByShortLink").Return(data.mockFindByShortLink, nil)
 
-	assert.Nil(t, err)
+		s := NewShortenerService(m)
+		err := s.CreateLink(link)
+
+		// m.AssertExpectations(t)
+
+		// assert.Nil(t, err)
+		assert.Equal(t, data.expected, err)
+	}
 }
 
 func TestServiceEditLink(t *testing.T) {

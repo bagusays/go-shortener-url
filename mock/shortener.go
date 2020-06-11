@@ -42,3 +42,39 @@ func (m *MockShortenerRepo) DeleteLink(data models.DeleteLink) error {
 	// return the values which we define
 	return args.Error(0)
 }
+
+type MockShortenerService struct {
+	mock.Mock
+}
+
+func (m *MockShortenerService) FindByShortLink(shortUrl string) (*models.Link, error) {
+	// This allows us to pass in mocked results, so that the mock store will return whatever we define
+	args := m.Called()
+	result := args.Get(0)
+	// return the values which we define
+	return result.(*models.Link), args.Error(1)
+}
+
+func (m *MockShortenerService) CreateLink(data models.Link) error {
+	// This allows us to pass in mocked results, so that the mock store will return whatever we define
+	args := m.Called()
+	// result := args.Get(0)
+	// return the values which we define
+	return args.Error(0)
+}
+
+func (m *MockShortenerService) EditLink(data models.Link) error {
+	// This allows us to pass in mocked results, so that the mock store will return whatever we define
+	args := m.Called()
+	// result := args.Get(0)
+	// return the values which we define
+	return args.Error(0)
+}
+
+func (m *MockShortenerService) DeleteLink(data models.DeleteLink) error {
+	// This allows us to pass in mocked results, so that the mock store will return whatever we define
+	args := m.Called()
+	// result := args.Get(0)
+	// return the values which we define
+	return args.Error(0)
+}

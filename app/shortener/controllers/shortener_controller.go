@@ -2,6 +2,7 @@ package shortener
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"url-shortener/domain"
 	"url-shortener/helpers"
@@ -19,17 +20,19 @@ func NewShortenerController(service domain.ShortenerServiceInterface) ShortenerC
 }
 
 func (s *ShortenerController) FindByShortLink() httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		shortLink := p.ByName("shortLink")
+	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		params := httprouter.ParamsFromContext(r.Context())
+		shortLink := params.ByName("shortLink")
+
 		products, err := s.ShortenerService.FindByShortLink(shortLink)
 
 		if err != nil {
-			helpers.JSONResponse(w, false, nil, err.Error())
+			helpers.JSONResponse(w, false, nil, err)
 			return
 		}
 
 		if products == nil {
-			helpers.JSONResponse(w, false, products, "404 Not Found")
+			helpers.JSONResponse(w, false, products, fmt.Errorf("NOT_FOUND"))
 			return
 		}
 
@@ -43,24 +46,24 @@ func (s *ShortenerController) CreateLink() httprouter.Handle {
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&createUrl)
 		if err != nil {
-			helpers.JSONResponse(w, false, nil, "Something wrong")
+			helpers.JSONResponse(w, false, nil, err)
 			return
 		}
 
 		if createUrl.LongUrl == "" {
-			helpers.JSONResponse(w, false, nil, "longUrl cannot be blank")
+			helpers.JSONResponse(w, false, nil, fmt.Errorf("MISSING_LONGURL"))
 			return
 		}
 
 		if createUrl.ShortUrl == "" {
-			helpers.JSONResponse(w, false, nil, "shortUrl cannot be blank")
+			helpers.JSONResponse(w, false, nil, fmt.Errorf("MISSING_SHORTURL"))
 			return
 		}
 
 		err = s.ShortenerService.CreateLink(createUrl)
 
 		if err != nil {
-			helpers.JSONResponse(w, false, nil, "Something wrong")
+			helpers.JSONResponse(w, false, nil, err)
 			return
 		}
 
@@ -74,28 +77,28 @@ func (s *ShortenerController) EditLink() httprouter.Handle {
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&link)
 		if err != nil {
-			helpers.JSONResponse(w, false, nil, "Something wrong")
+			helpers.JSONResponse(w, false, nil, err)
 			return
 		}
 
 		if link.LongUrl == "" {
-			helpers.JSONResponse(w, false, nil, "longUrl cannot be blank")
+			helpers.JSONResponse(w, false, nil, fmt.Errorf("MISSING_LONGURL"))
 			return
 		}
 
 		if link.ShortUrl == "" {
-			helpers.JSONResponse(w, false, nil, "shortUrl cannot be blank")
+			helpers.JSONResponse(w, false, nil, fmt.Errorf("MISSING_SHORTURL"))
 			return
 		}
 
 		err = s.ShortenerService.EditLink(link)
 
 		if err != nil {
-			helpers.JSONResponse(w, false, nil, "Something wrong")
+			helpers.JSONResponse(w, false, nil, err)
 			return
 		}
 
-		helpers.JSONResponse(w, true, nil, "Link updated successfully to: "+link.ShortUrl)
+		helpers.JSONResponse(w, true, "Link updated successfully to: "+link.ShortUrl, nil)
 	}
 }
 
@@ -105,21 +108,21 @@ func (s *ShortenerController) DeleteLink() httprouter.Handle {
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&link)
 		if err != nil {
-			helpers.JSONResponse(w, false, nil, "Something wrong")
+			helpers.JSONResponse(w, false, nil, err)
 			return
 		}
 		if link.ShortUrl == "" {
-			helpers.JSONResponse(w, false, nil, "shortUrl cannot be blank")
+			helpers.JSONResponse(w, false, nil, fmt.Errorf("MISSING_SHORTURL"))
 			return
 		}
 
 		err = s.ShortenerService.DeleteLink(link)
 
 		if err != nil {
-			helpers.JSONResponse(w, false, nil, "Something wrong")
+			helpers.JSONResponse(w, false, nil, err)
 			return
 		}
 
-		helpers.JSONResponse(w, true, nil, "Link updated successfully deleted")
+		helpers.JSONResponse(w, true, "Link have been successfully deleted", nil)
 	}
 }

@@ -1,6 +1,7 @@
 package shortener
 
 import (
+	"fmt"
 	"url-shortener/domain"
 	"url-shortener/models"
 )
@@ -22,6 +23,11 @@ func (s *ShortenerService) FindByShortLink(shortLink string) (*models.Link, erro
 }
 
 func (s *ShortenerService) CreateLink(data models.Link) error {
+	checkShortUrl, _ := s.FindByShortLink(data.ShortUrl)
+	if checkShortUrl != nil {
+		return fmt.Errorf("SHORT_URL_IS_TAKEN")
+	}
+
 	err := s.ShortenerRepo.CreateLink(data)
 	if err != nil {
 		return err
